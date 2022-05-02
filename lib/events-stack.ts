@@ -1,16 +1,32 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import { Events } from '../constructs/event-construct';
+import { LambdaConstruct } from '../constructs/lambda-constructs';
+import * as targets from 'aws-cdk-lib/aws-events-targets';
+import * as events from "aws-cdk-lib/aws-events";
 
 export class EventsStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    const rule = new Events(this, 'FirstRule');
+    const lambda = new LambdaConstruct(this, 'First');
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'EventsQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    rule.firstRule.addTarget(
+      new targets.LambdaFunction(lambda.secondLambda, {
+        event: events.RuleTargetInput.fromObject({
+          customData: events.EventField.fromPath('$.ole')
+        }),
+        
+      })
+    );
+
+    rule.firstBus.grantPutEventsTo(lambda.firstLambda);
+
+    targets.addLambdaPermission(rule.firstRule, lambda.secondLambda);
+
+    rule.firstRule.addEventPattern({
+      source: ['custom-source']
+    })
   }
 }
