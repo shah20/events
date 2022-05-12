@@ -17,7 +17,10 @@ export class Events extends Construct {
         new cdk.CfnOutput(this, 'BusName', {value: this.firstBus.eventBusName})
 
         this.firstRule = new event.Rule(this, 'FirstRule', {
-            eventBus: this.firstBus
+            eventBus: this.firstBus,
+            eventPattern: {
+                source: ['custom-source']
+            }
         });
     }
 }
